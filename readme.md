@@ -1,10 +1,9 @@
 # 商品状态+商品审核模块设计：
 ## 1. 方案设计：
 采用状态+职责链模式设计模块。商品状态部分State为父类定义抽象方法，OnSaleState、AbsentState、LoadingState为子类实现具体商品状态，Product为具体商品；商品上架审核部分Request为商品审核单记录补货的商品和数量，Auditor为父类定义审核人员，InventoryAuditor、SaleAuditor、ManagementAuditor为子类实现具体审核人员。
-此外，Inventory为现有商品在售情况，包括商品类别和商品数量，当某商品数量=0时将进入商品缺货状态，当商品审核单被驳回时将进入商品上架状态。
+此外，Inventory为现有商品在售情况，包括商品类别和商品数量，当某商品数量=0时将进入商品缺货状态，当商品审核单被驳回时将进入商品上架状态，当初始化和商品审核单被批准时将进入商品在售状态。
 ## 2.代码实现及截图：
 ```python
-# 商品状态
 class State(object):
     def __init__(self, p):
         pass
@@ -14,7 +13,7 @@ class State(object):
 # 在售状态
 class OnSaleState(State):
     def __init__(self, p):
-        pass
+        print("商品", p.name, "在售中")
     def sell(self, p, count):
         if count < p.count:
             p.count -= count
@@ -24,20 +23,20 @@ class OnSaleState(State):
             print("商品", p.name, "卖出数量", count, "剩余数量", p.count)
             p.set_state(AbsentState(p))
         else:
-            print("商品", name, "剩余数量不足")
+            print("商品", p.name, "剩余数量不足")
 # 缺货状态
 class AbsentState(State):
     def __init__(self, p):
-        print("商品", name, "缺货中，需要补货")
+        print("商品", p.name, "缺货中，需要补货")
     def sell(self, p, count):
-        print("商品", name, "缺货中，无法购买")
+        print("商品", p.name, "缺货中，无法购买")
 
 # 上架状态
 class LoadingState(State):
     def __init__(self, p):
-        print("商品", name, "上架中，等待批准")
+        print("商品", p.name, "上架中，等待批准")
     def sell(self, p, count):
-        print("商品", name, "上架中，无法购买")
+        print("商品", p.name, "上架中，无法购买")
 
 # 商品
 class Product(object):
@@ -46,10 +45,10 @@ class Product(object):
     __count = 0
     __name = None
     def __init__(self, price, count, name):
-        self.__state = OnSaleState(self)
         self.__price = price
         self.__count = count
         self.__name = name
+        self.__state = OnSaleState(self)
 
     def set_state(self, state):
         self.__state = state
@@ -182,7 +181,7 @@ if __name__ == '__main__':
             Inventory[name].sell(count)
     
     loading_products = [(120, 10, 'P1'), (120, 2, 'P3'), (60, 5, 'P4'),
-                    (40, 5, 'P5'), (60, 2, 'P6')]
+                    (40, 5, 'P5')]
     for price, count, name in loading_products:
         request = Request()
         request.price = price
@@ -202,7 +201,7 @@ if __name__ == '__main__':
     for p in Inventory.values():
         print("商品", p.name, "价格为", p.price, "数量为", p.count)
 
-    order_products = [(1, 'P1'), (1, 'P2'), (1, 'P3'), (1, 'P4'), (1, 'P5'), (1, 'P6')]
+    order_products = [(1, 'P1'), (1, 'P2'), (1, 'P3'), (1, 'P4'), (1, 'P5')]
     for count, name in order_products:
         print("收到商品", name, "订单 数量为", count)
         if name not in Inventory:

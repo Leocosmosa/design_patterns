@@ -1,4 +1,3 @@
-# 商品状态
 class State(object):
     def __init__(self, p):
         pass
@@ -8,7 +7,7 @@ class State(object):
 # 在售状态
 class OnSaleState(State):
     def __init__(self, p):
-        pass
+        print("商品", p.name, "在售中")
     def sell(self, p, count):
         if count < p.count:
             p.count -= count
@@ -18,20 +17,20 @@ class OnSaleState(State):
             print("商品", p.name, "卖出数量", count, "剩余数量", p.count)
             p.set_state(AbsentState(p))
         else:
-            print("商品", name, "剩余数量不足")
+            print("商品", p.name, "剩余数量不足")
 # 缺货状态
 class AbsentState(State):
     def __init__(self, p):
-        print("商品", name, "缺货中，需要补货")
+        print("商品", p.name, "缺货中，需要补货")
     def sell(self, p, count):
-        print("商品", name, "缺货中，无法购买")
+        print("商品", p.name, "缺货中，无法购买")
 
 # 上架状态
 class LoadingState(State):
     def __init__(self, p):
-        print("商品", name, "上架中，等待批准")
+        print("商品", p.name, "上架中，等待批准")
     def sell(self, p, count):
-        print("商品", name, "上架中，无法购买")
+        print("商品", p.name, "上架中，无法购买")
 
 # 商品
 class Product(object):
@@ -40,10 +39,10 @@ class Product(object):
     __count = 0
     __name = None
     def __init__(self, price, count, name):
-        self.__state = OnSaleState(self)
         self.__price = price
         self.__count = count
         self.__name = name
+        self.__state = OnSaleState(self)
 
     def set_state(self, state):
         self.__state = state
@@ -176,7 +175,7 @@ if __name__ == '__main__':
             Inventory[name].sell(count)
     
     loading_products = [(120, 10, 'P1'), (120, 2, 'P3'), (60, 5, 'P4'),
-                    (40, 5, 'P5'), (60, 2, 'P6')]
+                    (40, 5, 'P5')]
     for price, count, name in loading_products:
         request = Request()
         request.price = price
@@ -196,7 +195,7 @@ if __name__ == '__main__':
     for p in Inventory.values():
         print("商品", p.name, "价格为", p.price, "数量为", p.count)
 
-    order_products = [(1, 'P1'), (1, 'P2'), (1, 'P3'), (1, 'P4'), (1, 'P5'), (1, 'P6')]
+    order_products = [(1, 'P1'), (1, 'P2'), (1, 'P3'), (1, 'P4'), (1, 'P5')]
     for count, name in order_products:
         print("收到商品", name, "订单 数量为", count)
         if name not in Inventory:
